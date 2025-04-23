@@ -10,11 +10,13 @@ export class BookService {
   constructor(
     @InjectRepository(Book) private readonly book: Repository<Book>,
   ) {}
-  create(createBookDto: CreateBookDto) {
+  create(data: CreateBookDto) {
     const created = this.book.create({
-      ...createBookDto,
-      user: createBookDto.user,
-      genre: createBookDto.genre,
+      ...data,
+      user: { id: data.user },
+      genre: data.genre.map((id) => ({
+        id,
+      })),
     });
     return this.book.save(created);
   }
@@ -29,9 +31,25 @@ export class BookService {
     return one;
   }
 
-  async update(id: number, updateBookDto: UpdateBookDto) {
-    await this.book.update(id, updateBookDto);
-    const one = await this.book.findOneBy({ id });
+  async update(id: number, data: UpdateBookDto) {
+    const updateData: any = {
+      ...data,
+    };
+
+    if (data.user) {
+      updateData.user = { id: data.user };
+    }
+
+    if (data.genre) {
+      updateData.genre = data.genre.map((id) => ({ id }));
+    }
+
+    await this.book.update(id, updateData);
+    const one = await this.book.findOne({
+      where: { id },
+      relations: ['user', 'genre'],
+    });
+
     return one;
   }
 

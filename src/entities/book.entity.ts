@@ -22,6 +22,6 @@ export class Book {
   @ManyToOne(() => User, (user) => user.book)
   user: User;
 
-  @ManyToMany(() => Genre, (genre) => genre.book)
+  @ManyToOne(() => Genre, (genre) => genre.book)
   genre: Genre[];
 }
